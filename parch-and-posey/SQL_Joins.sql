@@ -86,7 +86,71 @@ WHERE a.name = 'Walmart';
 
 2.Provide a table that provides the region for each sales_rep along with their associated accounts. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to the account name.
 
-SELECT a.sales_rep_id
-FROM accounts a
-JOIN region 
-ON a.sales_rep_id = 
+Answer: 
+
+SELECT r.name region, s.name rep, a.name account
+FROM sales_reps s
+JOIN region r
+ON s.region_id = r.id
+JOIN accounts a 
+ON s.id = a.sales_rep_id
+ORDER BY a.name;
+
+3. Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. Your final table should have 3 columns: region name, account name, and unit price. A few accounts have 0 for total, so I divided by (total + 0.01) to assure not dividing by zero.
+
+Answer: 
+
+SELECT r.name region, a.name account, 
+    o.total_amt_usd/(o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON s.region_id = r.id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+JOIN orders o
+ON o.account_id = a.id;
+
+-------------------------------------------------------
+
+NOTES ON THE SYNTAX OF LEFT JOINS 
+
+SELECT *
+FROM customers
+LEFT JOIN orders 
+ON customers.id = orders.customer_id
+ORDER BY customers.id;
+
+Let’s go through the syntax of LEFT JOIN:
+
+SELECT – Start by listing the columns (from both tables) that you want to see in the result set (here we select all columns using *);
+FROM – Put the name of the left table, the one where you want to keep all the records (i.e. customers);
+LEFT JOIN – Write the name of the second (right) table (i.e. orders);
+ON – Use this keyword to indicate the columns that will be used to join the tables, i.e. the ones with the matching values. (Here, it’s id from customers and customer_id from orders).
+
+-------------------------------------------------------
+SLIDE 18 
+
+SELECT orders.*, accounts.*
+FROM orders
+LEFT JOIN accounts
+ON orders.account_id = accounts.id 
+WHERE accounts.sales_rep_id = 321500
+
+Adding AND instead of WHERE makes the end condition an extension of the ON
+clause instead of being an added filter on the end. 
+
+SELECT orders.*, accounts.*
+FROM orders
+LEFT JOIN accounts
+ON orders.account_id = accounts.id 
+AND accounts.sales_rep_id = 321500
+
+SLIDE 19 
+
+1. Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to the account name.
+
+Answer: 
+
+
+
+2.Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for accounts where the sales rep has a first name starting with S and in the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to the account name..
