@@ -248,3 +248,18 @@ ORDER BY unit_price DESC;
 
 Answer: 
 
+SELECT a.name, we.channel
+FROM accounts a
+LEFT JOIN web_events we
+ON we.account_id = a.id
+WHERE a.id = 1001;
+
+8. Find all the orders that occurred in 2015. Your final table should have 4 columns: occurred_at, account name, order total, and order total_amt_usd.
+
+Answer: 
+
+SELECT o.occurred_at, a.name, o.total, o.total_amt_usd
+FROM orders o 
+JOIN accounts a
+ON o.account_id = a.id
+WHERE o.occured_at BETWEEN '2015-01-01' AND '2015-12-31';
