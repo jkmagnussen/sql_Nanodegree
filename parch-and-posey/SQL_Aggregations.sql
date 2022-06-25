@@ -365,3 +365,78 @@ and
 SELECT DISTINCT id, name
 FROM sales_reps;
 
+
+SLIDE 22 
+
+SELECT account_id,
+       SUM(total_amt_usd) AS sum_total_amt_usd
+FROM orders
+GROUP BY 1
+ORDER BY 2 DESC
+
+
+SELECT account_id,
+       SUM(total_amt_usd) AS sum_total_amt_usd
+FROM orders
+GROUP BY 1
+HAVING SUM(total_amt_usd) >= 250000
+
+
+slide 23 
+
+WHERE subsets the returned data based on a logical condition.
+
+WHERE appears after the FROM, JOIN, and ON clauses, but before GROUP BY.
+
+HAVING appears after the GROUP BY clause, but before the ORDER BY clause.
+
+HAVING is like WHERE, but it works on logical statements involving aggregations.
+
+
+1. How many of the sales reps have more than 5 accounts that they manage?
+
+Answer: 
+
+SELECT s.id, s.name, COUNT(*) num_accounts
+FROM accounts a
+JOIN sales_reps s
+ON s.id = a.sales_rep_id
+GROUP BY s.id, s.name
+HAVING COUNT(*) > 5
+ORDER BY num_accounts;
+
+2. How many accounts have more than 20 orders?
+
+Answer: 
+
+SELECT a.id, a.name, COUNT(*) num_orders
+FROM accounts a
+JOIN orders o
+ON a.id = o.account_id
+GROUP BY a.id, a.name
+HAVING COUNT(*) > 20
+ORDER BY num_orders;
+
+3. Which account has the most orders?
+
+Answer: 
+
+SELECT a.id, a.name, COUNT(*) num_orders
+FROM accounts a
+JOIN orders o
+ON a.id = o.account_id
+GROUP BY a.id, a.name
+ORDER BY num_orders DESC
+LIMIT 1;
+
+4. Which accounts spent more than 30,000 usd total across all orders?
+
+Answer: 
+
+SELECT a.id, a.name, SUM(o.total_amt_usd) total_spent
+FROM accounts a
+JOIN orders o
+ON a.id = o.account_id
+GROUP BY a.id, a.name
+HAVING SUM(o.total_amt_usd) > 30000
+ORDER BY total_spent;
