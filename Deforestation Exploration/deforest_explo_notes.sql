@@ -3,14 +3,11 @@ Deforestation Exploration
 Joe Karl Magnussen 
 Udacity SQL Nanodegree Notes:
 
-a. What was the total forest area (in sq km) of the world in 1990? Please keep in mind that you can use the country record denoted as “World" in the region table.
-
 -------------------------------------------------------------------
 PART 1 - GLOBAL SITUATION
 -------------------------------------------------------------------
 
-
-Table draft:
+Temporary Table:
 
 CREATE VIEW forestation AS SELECT f.country_code AS country_code, f.country_name AS country_name, f.year, f.forest_area_sqkm AS forest_area_sq_km, l.total_area_sq_mi*2.59 AS land_area_sq_km, r.region, r.income_group, (f.forest_area_sqkm*100)/(l.total_area_sq_mi*2.59) AS per_forest_area_sqkm FROM forest_area f JOIN land_area l on f.country_code = l.country_code AND f.year = l.year JOIN regions r ON r.country_code = f.country_code;
 
@@ -98,30 +95,12 @@ PART 3 - COUNTRY-LEVEL DETAIL
 ------------------------------------------------------------------
 
 
+a. Which 5 countries saw the largest amount decrease in forest area from 1990 to 2016? What was the difference in forest area for each?
 
+b. Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each?
 
-SELECT SUM(forest_table.forest_area_sq_km) FROM forestation forest_table WHERE forest_table.year = 2009
+c. If countries were grouped by percent forestation in quartiles, which group had the most countries in it in 2016?
 
-SELECT region, MAX(per_forest_area_sqkm) FROM forestation1 WHERE year=2016 GROUP BY region; 
+d. List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016.
 
-
-98.2576939676578
-
-SELECT region, (forest_area_sq_km*100)/(land_area_sq_km) AS forest_area FROM forestation1 WHERE year=2016 GROUP BY region;
-
-SELECT region,
- Round(((Sum(forest_area_sqkm) / Sum(total_area_sq_mi*2.59))*100)::Numeric, 2) AS
-percent_forest
-FROM Forestation
-WHERE YEAR = 2016
-GROUP BY region
-ORDER BY percent_forest DESC
-
-
-
-
-
-
-SELECT SUM(forest_table.forest_area_sq_km) FROM forestation forest_table WHERE forest_table.year = 2009
-
-SELECT region, MAX(per_forest_area_sqkm) FROM forestation1 WHERE year=2016 GROUP BY region; 
+e. How many countries had a percent forestation higher than the United States in 2016?
