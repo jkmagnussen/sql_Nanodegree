@@ -51,7 +51,7 @@ Use these questions as guides to write SQL queries.
 Use the output from the query to answer these questions.
 
 Create a table that shows the Regions and their percent forest area (sum of forest area divided by sum of land area) in 1990 and 2016. (Note that 1 sq mi = 2.59 sq km).
-Based on the table you created, ...
+Based on the table you created, ....
 
 a. What was the percent forest of the entire world in 2016? Which region had the HIGHEST percent forest in 2016, and which had the LOWEST, to 2 decimal places?
 
