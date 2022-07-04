@@ -127,6 +127,35 @@ PART 3 - COUNTRY-LEVEL DETAIL
 ------------------------------------------------------------------
 
 
+top % change from 1990 - 2016? 
+
+
+       WITH forest_1990 AS (SELECT country_code, year, country_name, forest_area_sq_km 
+       FROM forestation 
+       WHERE year = 1990), 
+
+       forest_2016 AS (SELECT country_code, year, country_name, forest_area_sq_km FROM forestation WHERE year = 2016)
+
+       SELECT f16.country_code, f16.country_name, 
+       f90.year AS year_1990, 
+       f16.year AS year_2016, 
+       f90.forest_area_sq_km AS forest_1990, 
+       f16.forest_area_sq_km AS forest_2016, (f16.forest_area_sq_km - f90.forest_area_sq_km) AS forest_area_disparity, (f16.forest_area_sq_km - f90.forest_area_sq_km)*100/(f90.forest_area_sq_km) AS per_change_in_forest_area
+
+       FROM forest_1990 f90
+       JOIN forest_2016 f16
+       ON f90.country_code = f16.country_code
+       AND f90.country_name = f16.country_name
+       WHERE (f90.forest_area_sq_km IS NOT NULL) AND (f16.forest_area_sq_km  IS NOT NULL)
+       AND (f16.country_name != 'world')
+       ORDER BY per_change_in_forest_area DESC LIMIT 1;
+
+       Output:
+
+       country_code	country_name	forest_area_disparity	per_change_in_forest_area
+       ISL	       Iceland	343.9999962	              213.664588870028
+
+
 a. Which 5 countries saw the largest amount decrease in forest area from 1990 to 2016? What was the difference in forest area for each?
 
        WITH forest_1990 AS (SELECT country_code, year, country_name, forest_area_sq_km 
@@ -147,17 +176,42 @@ a. Which 5 countries saw the largest amount decrease in forest area from 1990 to
        AND f90.country_name = f16.country_name
        WHERE (f90.forest_area_sq_km IS NOT NULL) AND (f16.forest_area_sq_km  IS NOT NULL)
        AND (f16.country_name != 'world')
-       ORDER BY forest_area_disparity DESC;
+       ORDER BY forest_area_disparity DESC LIMIT 6
 
-       
+       Order BY land_area_sq_km and then forest_area_disparity DESC? 
 
 
-161.0000038	505	343.9999962
+
 
 b. Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each?
 
+
+       WITH forest_1990 AS (SELECT country_code, year, country_name, forest_area_sq_km 
+       FROM forestation 
+       WHERE year = 1990), 
+
+       forest_2016 AS (SELECT country_code, year, country_name, forest_area_sq_km FROM forestation WHERE year = 2016)
+
+       SELECT f16.country_code, f16.country_name, 
+       f90.year AS year_1990, 
+       f16.year AS year_2016, 
+       f90.forest_area_sq_km AS forest_1990, 
+       f16.forest_area_sq_km AS forest_2016, (f16.forest_area_sq_km - f90.forest_area_sq_km) AS forest_area_disparity, (f16.forest_area_sq_km - f90.forest_area_sq_km)*100/(f90.forest_area_sq_km) AS per_change_in_forest_area
+
+       FROM forest_1990 f90
+       JOIN forest_2016 f16
+       ON f90.country_code = f16.country_code
+       AND f90.country_name = f16.country_name
+       WHERE (f90.forest_area_sq_km IS NOT NULL) AND (f16.forest_area_sq_km  IS NOT NULL)
+       AND (f16.country_name != 'world')
+       ORDER BY per_change_in_forest_area ASC LIMIT 6;
+
 c. If countries were grouped by percent forestation in quartiles, which group had the most countries in it in 2016?
+
+
 
 d. List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016.
 
 e. How many countries had a percent forestation higher than the United States in 2016?
+
+Sort 3 beginning + A + B 
