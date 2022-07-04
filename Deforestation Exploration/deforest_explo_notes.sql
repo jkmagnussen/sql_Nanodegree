@@ -53,42 +53,74 @@ Use the output from the query to answer these questions.
 Create a table that shows the Regions and their percent forest area (sum of forest area divided by sum of land area) in 1990 and 2016. (Note that 1 sq mi = 2.59 sq km).
 Based on the table you created, ...
 
-a. What was the percent forest of the entire world in 2016? Which region had the HIGHEST percent forest in 2016, and which had the LOWEST, to 2 decimal places?
+a. What was the percent forest of the entire world in 2016? 
 
-       SELECT SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100 AS percentage
-       FROM forestation1 WHERE year = 2016;
+       SELECT (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 2016 ORDER BY perecent_forest DESC LIMIT 1;
 
-       Output: 31.3441787357731
+       Output: 
+
+       perecent_forest
+       31.3441787357731
+
+Which region had the HIGHEST percent forest in 2016, and which had the LOWEST, to 2 decimal places?
+
+Which region had the HIGHEST percent forest in 2016?
+
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 2016 GROUP BY region ORDER BY perecent_forest DESC LIMIT 1;
+
+       Output: 
+
+       region	                     perecent_forest
+       Latin America & Caribbean	46.1620721996047
+
+and which had the LOWEST?
+
+       Output: 
+
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 2016 GROUP BY region ORDER BY perecent_forest ASC LIMIT 1;
+
+       region	                     perecent_forest
+       Middle East & North Africa	2.06826486871501
 
 
 b. What was the percent forest of the entire world in 1990? Which region had the HIGHEST percent forest in 1990, and which had the LOWEST, to 2 decimal places?
 
-Highest - 
+What was the percent forest of the entire world in 1990?
 
-       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation1 WHERE year = 2016 GROUP BY region ORDER BY perecent_forest DESC;
+       SELECT (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 1990 ORDER BY perecent_forest DESC LIMIT 1;
 
-       output: Latin America & Caribbean	46.16
+       Output: 
 
-Lowest - 
+       perecent_forest
+       32.2111306265193
 
-       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 2016 GROUP BY region ORDER BY perecent_forest ASC;
+Which region had the HIGHEST percent forest in 1990?
 
-       output: Middle East & North Africa  	2.06826486871501
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 1990 GROUP BY region ORDER BY perecent_forest DESC LIMIT 1;
+
+       Output: 
+
+       region	                     perecent_forest
+       Latin America & Caribbean	51.0299798667514
+
+and which had the LOWEST?
+
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 1990 GROUP BY region ORDER BY perecent_forest ASC LIMIT 1;
+
+       region	                     perecent_forest
+       Middle East & North Africa	1.77524062469353
 
 c. Based on the table you created, which regions of the world DECREASED in forest area from 1990 to 2016?
 
-       DRAFT: 
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 2016 GROUP BY region ORDER BY perecent_forest DESC;
 
-       SELECT region FROM forestation WHERE forestation.forest_area_sq_km IN (forestation.year = 2009) < forest_area_sq_km IN (forestation.year = 2016);
+       AND 
 
+       SELECT region, (SUM(forest_area_sq_km)/SUM(land_area_sq_km)*100) AS perecent_forest FROM forestation WHERE year = 1990 GROUP BY region ORDER BY perecent_forest DESC;
 
-       SELECT region FROM forestation WHERE forestation.year BETWEEN 2009 AND 2016 AND forestation.year 
-
-
-
-
-
-
+       Output/ Findings: 
+       
+       Latin America and Caribbean (dropped from 51.02% to 46.16%) and Sub-Saharan Africa (30.67% to 28.78%)
 
 ------------------------------------------------------------------
 PART 3 - COUNTRY-LEVEL DETAIL
@@ -96,6 +128,31 @@ PART 3 - COUNTRY-LEVEL DETAIL
 
 
 a. Which 5 countries saw the largest amount decrease in forest area from 1990 to 2016? What was the difference in forest area for each?
+
+       WITH forest_1990 AS (SELECT country_code, year, country_name, forest_area_sq_km 
+       FROM forestation 
+       WHERE year = 1990), 
+
+       forest_2016 AS (SELECT country_code, year, country_name, forest_area_sq_km FROM forestation WHERE year = 2016)
+
+       SELECT f16.country_code, f16.country_name, 
+       f90.year AS year_1990, 
+       f16.year AS year_2016, 
+       f90.forest_area_sq_km AS forest_1990, 
+       f16.forest_area_sq_km AS forest_2016, (f16.forest_area_sq_km - f90.forest_area_sq_km) AS forest_area_disparity 
+
+       FROM forest_1990 f90
+       JOIN forest_2016 f16
+       ON f90.country_code = f16.country_code
+       AND f90.country_name = f16.country_name
+       WHERE (f90.forest_area_sq_km IS NOT NULL) AND (f16.forest_area_sq_km  IS NOT NULL)
+       AND (f16.country_name != 'world')
+       ORDER BY forest_area_disparity DESC;
+
+       
+
+
+161.0000038	505	343.9999962
 
 b. Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each?
 
