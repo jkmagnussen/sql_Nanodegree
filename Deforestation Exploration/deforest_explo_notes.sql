@@ -252,9 +252,7 @@ forestation_quartiles	count
 
 d. List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016.
 
-SELECT region, per_forest_area_sqkm, country_name
+SELECT region, ROUND(per_forest_area_sqkm::numeric, 2) AS rounded, country_name
 FROM forestation WHERE year = 2016 
-AND (per_forest_area_sqkm > 75);
-
-
-(could add ORDER BY 2 DESC;)
+AND (per_forest_area_sqkm > 75) 
+ORDER BY rounded DESC;
