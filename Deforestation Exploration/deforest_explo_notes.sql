@@ -138,7 +138,7 @@ top % change from 1990 - 2016?
 
        SELECT f16.country_code, f16.country_name, 
        f90.year AS year_1990, 
-       f16.year AS year_2016, 
+       f16.year AS year_2016,
        f90.forest_area_sq_km AS forest_1990, 
        f16.forest_area_sq_km AS forest_2016, (f16.forest_area_sq_km - f90.forest_area_sq_km) AS forest_area_disparity, (f16.forest_area_sq_km - f90.forest_area_sq_km)*100/(f90.forest_area_sq_km) AS per_change_in_forest_area
 
@@ -149,6 +149,7 @@ top % change from 1990 - 2016?
        WHERE (f90.forest_area_sq_km IS NOT NULL) AND (f16.forest_area_sq_km  IS NOT NULL)
        AND (f16.country_name != 'world')
        ORDER BY per_change_in_forest_area DESC LIMIT 1;
+
 
        Output:
 
@@ -208,10 +209,34 @@ b. Which 5 countries saw the largest percent decrease in forest area from 1990 t
 
 c. If countries were grouped by percent forestation in quartiles, which group had the most countries in it in 2016?
 
+SELECT DISTINCT(forestation_quartiles), 
+COUNT(country_name)
+OVER (PARTITION BY forestation_quartiles)
+FROM (SELECT country_name,
+CASE WHEN per_forest_area_sqkm <= 25
+THEN 1 WHEN per_forest_area_sqkm > 25
+AND per_forest_area_sqkm <= 50 
+THEN 2 WHEN per_forest_area_sqkm > 50 
+AND per_forest_area_sqkm <= 75 THEN 3 
+ELSE 4 END AS forestation_quartiles
+FROM forestation
+WHERE year = 2016 
+AND (per_forest_area_sqkm IS NOT NULL)) fq
+
+Output:
+
+forestation_quartiles	count
+1	                     85
+2	                     73
+3	                     38
+4	                     9
 
 
 d. List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016.
 
-e. How many countries had a percent forestation higher than the United States in 2016?
+SELECT region, per_forest_area_sqkm, country_name
+FROM forestation WHERE year = 2016 
+AND (per_forest_area_sqkm > 75);
 
-Sort 3 beginning + A + B 
+
+(could add ORDER BY 2 DESC;)
