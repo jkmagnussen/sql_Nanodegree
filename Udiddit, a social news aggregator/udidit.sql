@@ -93,17 +93,18 @@ CREATE TABLE bad_comments (
 	post_id BIGINT,
 	text_content TEXT
 );
+
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 PART II - DDL FOR NEW SCHEMA: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-create table users (
+CREATE TABLE users (
        id SERIAL PRIMARY KEY,
        username VARCHAR(25) NOT NULL UNIQUE, 
        post id INT FOREIGN KEY(post.id)
 )
 
-CREATE posts (
+CREATE TABLE posts (
        id SERIAL PRIMARY KEY
        topic VARCHAR(30) NOT NULL UNIQUE, 
        topic_description VARCHAR(500),
@@ -116,11 +117,28 @@ CREATE posts (
 
 );
 
-CREATE comments (
+CREATE TABLE comments (
        id SERIAL PRIMARY KEY 
        text TEXT NOT NULL, 
-)
+);
 
+CREATE TABLE comment_thread_link (
+       id SERIAL PRIMARY KEY 
+       assoc_post INT,
+       FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
+       assoc_comment INT,
+       FOREIGN KEY (assoc_comment) REFERENCES comments (id) ON DELETE CASCADE,
+);
 
-section D-V
- ON DELETE CASCADE
+thoughts: 
+trying to create some kind of junction point so that a table can hold comment relations 
+so that sub comment levels are possible. 
+
+CREATE TABLE vote ( 
+       id SERIAL PRIMARY KEY
+       up_down_vote INT,
+       voted_post INT
+       FOREIGN KEY (voted_post) REFERENCES posts (id) ON DELETE CASCADE,
+       user_vote 
+       FOREIGN KEY (user_vote) REFERENCES users (id,
+);
