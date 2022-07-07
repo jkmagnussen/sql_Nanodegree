@@ -101,7 +101,7 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 CREATE TABLE users (
        id SERIAL PRIMARY KEY,
        username VARCHAR(25) NOT NULL UNIQUE, 
-       post id INT FOREIGN KEY(post.id)
+       post_id INT FOREIGN KEY(post.id)
 )
 
 CREATE TABLE posts (
@@ -117,20 +117,23 @@ CREATE TABLE posts (
 
 );
 
-CREATE TABLE comments (
+CREATE TABLE comment_content (
        id SERIAL PRIMARY KEY 
        text TEXT NOT NULL, 
 );
 
-CREATE TABLE comment_thread_link (
+CREATE TABLE comment_link (
        id SERIAL PRIMARY KEY 
        assoc_post INT,
        FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
        assoc_comment INT,
-       FOREIGN KEY (assoc_comment) REFERENCES comments (id) ON DELETE CASCADE,
+       FOREIGN KEY (assoc_comment) REFERENCES comment_content (id) ON DELETE CASCADE,
+       assoc_user INT, 
+       FOREIGN KEY (assoc_user) REFERENCES users (id),
+
 );
 
-thoughts: 
+THOUGHTS: 
 trying to create some kind of junction point so that a table can hold comment relations 
 so that sub comment levels are possible. 
 
@@ -140,5 +143,11 @@ CREATE TABLE vote (
        voted_post INT
        FOREIGN KEY (voted_post) REFERENCES posts (id) ON DELETE CASCADE,
        user_vote 
-       FOREIGN KEY (user_vote) REFERENCES users (id,
+       FOREIGN KEY (user_vote) REFERENCES users (id),
 );
+
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+PART III - DDL FOR NEW SCHEMA: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
