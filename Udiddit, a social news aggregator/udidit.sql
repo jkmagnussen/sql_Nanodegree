@@ -100,37 +100,41 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 CREATE TABLE users (
        id SERIAL PRIMARY KEY,
-       username VARCHAR(25) NOT NULL UNIQUE, 
-       post_id INT FOREIGN KEY(post.id)
-)
+       username VARCHAR(25) NOT NULL UNIQUE
+);
+
+CREATE TABLE topic ( 
+       id SERIAL PRIMARY KEY,
+       topic VARCHAR(30) NOT NULL UNIQUE, 
+       topic_description VARCHAR(500)
+);
 
 CREATE TABLE posts (
-       id SERIAL PRIMARY KEY
-       topic VARCHAR(30) NOT NULL UNIQUE, 
-       topic_description VARCHAR(500),
+       id SERIAL PRIMARY KEY,
+       topic_link INT, 
+       FOREIGN KEY (topic_link) REFERENCES topic (id),
        title  VARCHAR(100) NOT NULL, 
        url VARCHAR(4000) DEFAULT '', 
        text_content TEXT DEFAULT '',
        user_id INT, 
        FOREIGN KEY(user_id) REFERENCES users (id),
        CONSTRAINT onlyUrlOrText CHECK ((NULLIF (url, '') IS NULL OR NULLIF (text_content, '') is NULL) AND NOT (NULLIF(url, '') IS NULL AND NULLIF(text_content, '' ) IS NULL))
-
 );
 
 CREATE TABLE comment_content (
-       id SERIAL PRIMARY KEY 
-       text TEXT NOT NULL, 
+       id SERIAL PRIMARY KEY,
+       text TEXT NOT NULL
 );
 
 CREATE TABLE comment_link (
-       id SERIAL PRIMARY KEY 
+       id SERIAL PRIMARY KEY, 
        assoc_post INT,
        FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
        assoc_comment INT,
        FOREIGN KEY (assoc_comment) REFERENCES comment_content (id) ON DELETE CASCADE,
        assoc_user INT, 
-       FOREIGN KEY (assoc_user) REFERENCES users (id),
-
+       FOREIGN KEY (assoc_comment) REFERENCES comment_link (id) ON DELETE CASCADE,
+       FOREIGN KEY (assoc_user) REFERENCES users (id)
 );
 
 THOUGHTS: 
@@ -138,12 +142,12 @@ trying to create some kind of junction point so that a table can hold comment re
 so that sub comment levels are possible. 
 
 CREATE TABLE vote ( 
-       id SERIAL PRIMARY KEY
+       id SERIAL PRIMARY KEY,
        up_down_vote INT,
-       voted_post INT
+       voted_post INT,
        FOREIGN KEY (voted_post) REFERENCES posts (id) ON DELETE CASCADE,
-       user_vote 
-       FOREIGN KEY (user_vote) REFERENCES users (id),
+       user_vote INT, 
+       FOREIGN KEY (user_vote) REFERENCES users (id)
 );
 
 
@@ -151,3 +155,25 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 PART III - DDL FOR NEW SCHEMA: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
+#SELECT DISTINCT bad_post.username INTO users FROM bad_post;
+
+INSERT INTO users (username) SELECT DISTINCT username FROM bad_posts;
+
+INSERT INTO posts (topic, title, url, text_content, user_id) SELECT topic, title, url, text_content, users.id AS user_id FROM bad_posts INNER JOIN users ON users.username = bad_posts.username;
+
+
+merge comment_link  with comment_content 
+
+create a seperate table for topic descriptions 
+
+delete topic VARCHAR(30) NOT NULL UNIQUE & topic_description VARCHAR(500) from posts. 
+
+Then: 
+
+CREATE TABLE topic ( 
+       id SERIAL PRIMARY KEY,
+       topic VARCHAR(30) NOT NULL UNIQUE, 
+       topic_description VARCHAR(500)
+);
+
+1-c. Allow registered users to create new posts on existing topics? 
