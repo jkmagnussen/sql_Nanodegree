@@ -177,3 +177,7 @@ CREATE TABLE topic (
 );
 
 1-c. Allow registered users to create new posts on existing topics? 
+
+I read this back and realised it was the post tat needed a foreign key on it for the topic, one to many (topic > post). 
+
+Need to merge the comments. 
