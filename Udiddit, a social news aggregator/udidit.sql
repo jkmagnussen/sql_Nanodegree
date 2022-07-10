@@ -137,10 +137,6 @@ CREATE TABLE comment_link (
        FOREIGN KEY (assoc_user) REFERENCES users (id)
 );
 
-THOUGHTS: 
-trying to create some kind of junction point so that a table can hold comment relations 
-so that sub comment levels are possible. 
-
 CREATE TABLE vote ( 
        id SERIAL PRIMARY KEY,
        up_down_vote INT,
@@ -161,10 +157,9 @@ INSERT INTO users (username) SELECT DISTINCT username FROM bad_posts;
 
 INSERT INTO posts (topic, title, url, text_content, user_id) SELECT topic, title, url, text_content, users.id AS user_id FROM bad_posts INNER JOIN users ON users.username = bad_posts.username;
 
+To do: 
 
-merge comment_link  with comment_content 
-
-create a seperate table for topic descriptions 
+merge comment_link  with comment_content, create a seperate table for topic descriptions 
 
 delete topic VARCHAR(30) NOT NULL UNIQUE & topic_description VARCHAR(500) from posts. 
 
