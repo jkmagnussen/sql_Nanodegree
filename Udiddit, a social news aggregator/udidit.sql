@@ -144,9 +144,9 @@ CREATE INDEX last_contributed ON posts (user_id, updated);
 
 CREATE TABLE comments (
        id SERIAL PRIMARY KEY, 
-       assoc_post INT,
+       assoc_post INT NOT NULL,
        FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
-       assoc_comment INT,
+       assoc_comment INT NOT NULL,
        FOREIGN KEY (assoc_comment) REFERENCES comments (id) ON DELETE CASCADE,
        assoc_user INT, 
        FOREIGN KEY (assoc_user) REFERENCES users (id) ON DELETE SET NULL,
@@ -164,7 +164,7 @@ CREATE INDEX last_updated_comment_by_user ON comments (assoc_user, updated);
 CREATE TABLE vote ( 
        id SERIAL PRIMARY KEY,
        up_down_vote INT,
-       voted_post INT,
+       voted_post INT NOT NULL,
        FOREIGN KEY (voted_post) REFERENCES posts (id) ON DELETE CASCADE,
        user_vote INT, 
        FOREIGN KEY (user_vote) REFERENCES users (id) ON DELETE SET NULL,
@@ -183,7 +183,7 @@ USERS
 ----------------------------------------
 INSERT INTO users (username) 
        SELECT DISTINCT username 
-       FROM bad_posts;
+       FROM bad_posts UNION SELECT DISTINCT username FROM bad_comments UNION SELECT DISTINCT username FROM (SELECT DISTINCT regexp_split_to_table(downvotes, ',') AS username FROM bad_posts UNION SELECT DISTINCT regexp_split_to_table(upvotes, ',') FROM bad_posts) bp1;
 
 ----------------------------------------
 TOPIC
