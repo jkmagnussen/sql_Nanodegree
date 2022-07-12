@@ -186,6 +186,13 @@ INSERT INTO users (username)
        FROM bad_posts;
 
 ----------------------------------------
+TOPIC
+----------------------------------------
+INSERT INTO topic (topics) 
+       SELECT DISTINCT topic       
+       AS topics 
+       FROM bad_posts; 
+----------------------------------------
 POSTS
 ----------------------------------------
 INSERT INTO posts (topic_link, user_id, title, url, text_content)
@@ -229,15 +236,9 @@ INSERT INTO comments (assoc_post, assoc_user, comment_text)
 SELECT bc.post_id, u.id, bc.text_content 
 FROM bad_comments bc
 INNER JOIN users u
-ON comments.assoc_user = bc.username;
+ON u.username = bc.username;
 
-----------------------------------------
-TOPIC
-----------------------------------------
-INSERT INTO topic (topics) 
-       SELECT DISTINCT topic       
-       AS topics 
-       FROM bad_posts; 
+
 
 
 
