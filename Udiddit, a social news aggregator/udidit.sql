@@ -179,8 +179,6 @@ CREATE INDEX vote_number_by_post ON vote (voted_post, id);
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 PART III - DDL FOR NEW SCHEMA: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-----------------------------------------
 USERS
 ----------------------------------------
 INSERT INTO users (username) 
@@ -202,12 +200,26 @@ INSERT INTO posts (topic_link, user_id, title, url, text_content)
 ----------------------------------------
 VOTE
 ----------------------------------------
-INSERT INTO vote (voted_post, up_down_vote) 
-       SELECT bad_posts.id, (COUNT(bad_posts.upvotes) - COUNT(bad_posts.downvotes)) AS up_down_vote
-       FROM bad_posts 
-       GROUP BY bad_posts.id;
 
--- Vote table COUNT or ::integer
+INSERT INTO vote (up_down_vote, voted_post, user_vote) 
+SELECT -1 AS up_down_vote, 
+downvotes.id AS voted_post, 
+users.id AS user_vote 
+FROM (SELECT DISTINCT regexp_split_to_table(downvotes, ',') AS downvote_user,
+id FROM bad_posts) 
+downvotes 
+INNER JOIN  users 
+ON downvotes.downvote_user = users.username;
+
+INSERT INTO vote (up_down_vote, voted_post, user_vote) 
+SELECT 1 AS up_down_vote, 
+upvotes.id AS voted_post, 
+users.id AS user_vote 
+FROM (SELECT DISTINCT regexp_split_to_table(upvotes, ',') AS upvote_user, 
+id FROM bad_posts) 
+upvotes 
+INNER JOIN users 
+ON upvotes.upvote_user = users.username;
 
 ----------------------------------------
 COMMENTS
@@ -226,3 +238,6 @@ INSERT INTO topic (topics)
        SELECT DISTINCT topic       
        AS topics 
        FROM bad_posts; 
+
+
+
