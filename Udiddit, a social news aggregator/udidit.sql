@@ -100,42 +100,66 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 CREATE TABLE users (
        id SERIAL PRIMARY KEY,
-       username VARCHAR(25) NOT NULL UNIQUE
+       username VARCHAR(25) NOT NULL UNIQUE,
+       createdtime timestamp NOT NULL DEFAULT NOW(),
+       lastloggedin timestamp NOT NULL DEFAULT NOW(), 
+       CONSTRAINT username_not_empty CHECK(LENGTH(TRIM(username)) > 0)
 );
+
+create index latest_created_users ON users (id, createdtime );
+
 
 CREATE TABLE topic ( 
        id SERIAL PRIMARY KEY,
-       topic VARCHAR(30) NOT NULL UNIQUE, 
-       topic_description VARCHAR(500)
+       topics VARCHAR(30) NOT NULL UNIQUE, 
+       topic_description VARCHAR(500),
+       created timestamp NOT NULL DEFAULT NOW(),
+       updated timestamp NOT NULL DEFAULT NOW(),
+       CONSTRAINT topic_name_not_empty CHECK(LENGTH(TRIM(topics)) > 0)
 );
+CREATE INDEX latest_amended_topic ON topic (topics, updated);
+CREATE INDEX latest_topic ON topic (topics, created);
+
 
 CREATE TABLE posts (
        id SERIAL PRIMARY KEY,
        topic_link INT, 
-       FOREIGN KEY (topic_link) REFERENCES topic (id),
-       title  VARCHAR(100) NOT NULL, 
+       FOREIGN KEY (topic_link) REFERENCES topic (id) ON DELETE SET NULL,
+       title VARCHAR(100) NOT NULL, 
        url VARCHAR(4000) DEFAULT '', 
        text_content TEXT DEFAULT '',
        user_id INT, 
-       FOREIGN KEY(user_id) REFERENCES users (id),
-       CONSTRAINT onlyUrlOrText CHECK ((NULLIF (url, '') IS NULL OR NULLIF (text_content, '') is NULL) AND NOT (NULLIF(url, '') IS NULL AND NULLIF(text_content, '' ) IS NULL))
+       FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE SET NULL,
+       CONSTRAINT onlyUrlOrText CHECK ((NULLIF (url, '') IS NULL OR NULLIF (text_content, '') is NULL) AND NOT (NULLIF(url, '') IS NULL AND NULLIF(text_content, '' ) IS NULL)),
+       created timestamp NOT NULL DEFAULT NOW(),
+       updated timestamp NOT NULL DEFAULT NOW(), 
+       CONSTRAINT title_name_not_empty CHECK(LENGTH(TRIM(title )) > 0)
+
 );
 
-CREATE TABLE comment_content (
-       id SERIAL PRIMARY KEY,
-       text TEXT NOT NULL
-);
+CREATE INDEX latest_post_for_topic ON posts (topic_link, created);
+CREATE INDEX latest_posts_for_user ON posts (user_id, created);
+CREATE INDEX last_contributed ON posts (user_id, updated);
 
-CREATE TABLE comment_link (
+
+CREATE TABLE comments (
        id SERIAL PRIMARY KEY, 
        assoc_post INT,
        FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
        assoc_comment INT,
-       FOREIGN KEY (assoc_comment) REFERENCES comment_content (id) ON DELETE CASCADE,
+       FOREIGN KEY (assoc_comment) REFERENCES comments (id) ON DELETE CASCADE,
        assoc_user INT, 
-       FOREIGN KEY (assoc_comment) REFERENCES comment_link (id) ON DELETE CASCADE,
-       FOREIGN KEY (assoc_user) REFERENCES users (id)
+       FOREIGN KEY (assoc_user) REFERENCES users (id) ON DELETE SET NULL,
+       comment_text TEXT NOT NULL,
+       created timestamp NOT NULL DEFAULT NOW(),
+       updated timestamp NOT NULL DEFAULT NOW(),
+       CONSTRAINT comment_text_not_empty CHECK(LENGTH(TRIM(comment_text)) > 0)
+
 );
+
+CREATE INDEX latest_comment_reply ON comments(assoc_comment, created);
+CREATE INDEX latest_comment_for_user ON comments (assoc_user, created);
+CREATE INDEX last_updated_comment_by_user ON comments (assoc_user, updated);
 
 CREATE TABLE vote ( 
        id SERIAL PRIMARY KEY,
@@ -143,36 +167,62 @@ CREATE TABLE vote (
        voted_post INT,
        FOREIGN KEY (voted_post) REFERENCES posts (id) ON DELETE CASCADE,
        user_vote INT, 
-       FOREIGN KEY (user_vote) REFERENCES users (id)
+       FOREIGN KEY (user_vote) REFERENCES users (id) ON DELETE SET NULL,
+       created timestamp NOT NULL DEFAULT NOW(),
+       updated timestamp NOT NULL DEFAULT NOW(),
+       CONSTRAINT one_vote_per_post UNIQUE(user_vote, voted_post)
 );
 
+CREATE INDEX latest_post_vote ON vote (voted_post, created);
+CREATE INDEX vote_number_by_post ON vote (voted_post, id);
 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 PART III - DDL FOR NEW SCHEMA: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-#SELECT DISTINCT bad_post.username INTO users FROM bad_post;
+----------------------------------------
+USERS
+----------------------------------------
+INSERT INTO users (username) 
+       SELECT DISTINCT username 
+       FROM bad_posts;
 
-INSERT INTO users (username) SELECT DISTINCT username FROM bad_posts;
+----------------------------------------
+POSTS
+----------------------------------------
+INSERT INTO posts (topic_link, user_id, title, url, text_content)
+	SELECT t.id, u.id, 
+		 LEFT(title,100), url, bp.text_content
+	FROM bad_posts bp
+	JOIN topic t
+	ON bp.topic = t.topics
+	JOIN users u
+	ON bp.username = u.username;
 
-INSERT INTO posts (topic, title, url, text_content, user_id) SELECT topic, title, url, text_content, users.id AS user_id FROM bad_posts INNER JOIN users ON users.username = bad_posts.username;
+----------------------------------------
+VOTE
+----------------------------------------
+INSERT INTO vote (voted_post, up_down_vote) 
+       SELECT bad_posts.id, (COUNT(bad_posts.upvotes) - COUNT(bad_posts.downvotes)) AS up_down_vote
+       FROM bad_posts 
+       GROUP BY bad_posts.id;
 
-To do: 
+-- Vote table COUNT or ::integer
 
-merge comment_link  with comment_content, create a seperate table for topic descriptions 
+----------------------------------------
+COMMENTS
+----------------------------------------
 
-delete topic VARCHAR(30) NOT NULL UNIQUE & topic_description VARCHAR(500) from posts. 
+INSERT INTO comments (assoc_post, assoc_user, comment_text) 
+SELECT bc.post_id, u.id, bc.text_content 
+FROM bad_comments bc
+INNER JOIN users u
+ON comments.assoc_user = bc.username;
 
-Then: 
-
-CREATE TABLE topic ( 
-       id SERIAL PRIMARY KEY,
-       topic VARCHAR(30) NOT NULL UNIQUE, 
-       topic_description VARCHAR(500)
-);
-
-1-c. Allow registered users to create new posts on existing topics? 
-
-I read this back and realised it was the post tat needed a foreign key on it for the topic, one to many (topic > post). 
-
-Need to merge the comments. 
+----------------------------------------
+TOPIC
+----------------------------------------
+INSERT INTO topic (topics) 
+       SELECT DISTINCT topic       
+       AS topics 
+       FROM bad_posts; 
