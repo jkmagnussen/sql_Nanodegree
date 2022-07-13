@@ -146,7 +146,7 @@ CREATE TABLE comments (
        id SERIAL PRIMARY KEY, 
        assoc_post INT NOT NULL,
        FOREIGN KEY(assoc_post) REFERENCES posts (id) ON DELETE CASCADE,
-       assoc_comment INT NOT NULL,
+       assoc_comment INT,
        FOREIGN KEY (assoc_comment) REFERENCES comments (id) ON DELETE CASCADE,
        assoc_user INT, 
        FOREIGN KEY (assoc_user) REFERENCES users (id) ON DELETE SET NULL,
@@ -154,6 +154,8 @@ CREATE TABLE comments (
        created timestamp NOT NULL DEFAULT NOW(),
        updated timestamp NOT NULL DEFAULT NOW(),
        CONSTRAINT comment_text_not_empty CHECK(LENGTH(TRIM(comment_text)) > 0)
+
+-- removed NOT NULL from assoc_comment
 
 );
 
