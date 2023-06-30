@@ -1,10 +1,9 @@
 <h1>Udacity Nanodegree<h1/>
-<h3>Student: Joe Karl Magnussen</h3>
+<img src="Nanodegree_Certificate.png" alt="Nanodegree Certificate">
+
 
 Course overview:
 https://www.udacity.com/course/learn-sql--nd072?utm_source=gsem_brand&utm_medium=ads_r&utm_campaign=12906460312_c_individuals&utm_term=121838874139&utm_keyword=sql%20udacity_e&gclid=Cj0KCQjwhqaVBhCxARIsAHK1tiMqg4qy1kHBz0-E0K_qCDRLzyno8uBQ3CUzIeF_3hogU4AdPTWVDKEaAsBQEALw_wcB
-
-<img src="Nanodegree_Certificate.png" alt="Nanodegree Certificate">
 
 LEARN SQL
 
